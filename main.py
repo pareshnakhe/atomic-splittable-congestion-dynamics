@@ -106,7 +106,7 @@ class Agent:
                 method='SLSQP')
 
             self.para_est_a[i] = result.x[0]
-            self.para_est_a[i] = result.x[1]
+            self.para_est_b[i] = result.x[1]
             # print "Resource", i, " parameters:", result.x
 
 
@@ -149,7 +149,7 @@ for agent_index, agent in enumerate(agent_list):
 
 # Now start with actual learning
 for t in range(LEARN_RNDS):
-    if t % 3 == 0:
+    if t % 5 == 0:
         color_list.append('blue')
         size_list.append(40)
     else:
@@ -158,7 +158,7 @@ for t in range(LEARN_RNDS):
 
     for agent_index, agent in enumerate(agent_list):
         # exploration rounds
-        if t % 3 == 0:
+        if t % 5 == 0:
             agent_flow = agent.get_random_flow()
         # exploitation rounds
         else:
