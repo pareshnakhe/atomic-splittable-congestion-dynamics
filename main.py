@@ -1,6 +1,7 @@
 # http://xgboost.readthedocs.io/en/latest/model.html
 
 import numpy as np
+import math
 from scipy import optimize
 import matplotlib.pyplot as plt
 
@@ -21,9 +22,11 @@ class Resource:
         # set the latency function for each resource
         for i in range(N_RES):
             # self.latency_func[i, :] = randNumGenerator.random_sample(2,)
-            self.latency_func[i, :] = np.array([(i+1)**2, (i+1)**2])
+            # self.latency_func[i, :] = np.array([(i+1)**2, (i+1)**2])
+            self.latency_func[i, :] = np.array([i+1, 0])
 
         self.crnt_flow_matrix = np.zeros([N_AGENTS, N_RES])
+        print "In Resource constructor:", self.latency_func[:, 1]
 
     def get_latency_vector(self):
         """
@@ -50,8 +53,13 @@ class Agent:
         para_est_a/b is a vector of current parameter estimates for this agent Object
         """
         #self.para_est_a = np.random.random_sample(N_RES,)
+        if rsrc_object is None:
+            print "Agent class has no resource object"
+            exit(1)
+
         self.para_est_a = np.ones(N_RES)
-        self.para_est_b = np.ones(N_RES)
+        # this is a constant for each agent
+        self.para_est_b = rsrc_object.latency_func[:, 1]
 
         # this stores the flow sent and the resulting latency
         # observed for each resource
@@ -79,8 +87,7 @@ class Agent:
         return result.x
 
     def update_crnt_para_est(self):
-        """VANILLA Version
-
+        """
         for each resource compute parameters A and B s.t
         A_t, B_t = \argmin_{A, B} \sum_t (A * x_t + B - K_t)^2 (this is plain linear regression)
         where x_t corresponds to the flow sent by the agent on this resource
@@ -93,29 +100,34 @@ class Agent:
         # history[0] = [(1,2), (1.5, 2.5), (0.8, 1.5)]
         # history[1] = [(1,2), (1.1, 2.5), (0.8, 1.5)]
 
+        # HERE WE ONLY WANT TO OPTIMIZE THE COEFFICIENT OF X (A). B IS FIXED
 
         for i in range(N_RES):
-            A_crnt = self.para_est_a[i]
-            B_crnt = self.para_est_b[i]
+            A_est = self.para_est_a[i]
+            B = self.para_est_b[i]
             crnt_rsrc_history = self.rsrc_history[i]
 
+            # \sum_t 1/\sqrt(t) (A*x_t + B - d_t)^2
+            # The idea is to decrease the weight of older observations as 1/\sqrt(t).
             result = optimize.minimize(
-                lambda x: (sum([(x[0]*i + x[1] - j)**2 for (i, j) in crnt_rsrc_history]) + 10*((A_crnt - x[0])**2 + (B_crnt - x[1])**2)),
-                np.array([0.1, 0.2]),  # x_init
-                bounds=([(0, None), (0, None)]),
-                method='SLSQP')
+                    lambda x: (sum([math.sqrt(1.0/(index+1))*(x*data[0] + B - data[1])**2 for index, data in enumerate(crnt_rsrc_history)]) + 15.0*((A_est - x)**2)),
+                    np.array([0.1]),  # x_init
+                    bounds=([(0, None)]),
+                    method='SLSQP')
 
-            self.para_est_a[i] = result.x[0]
-            self.para_est_b[i] = result.x[1]
+            self.para_est_a[i] = result.x
             # print "Resource", i, " parameters:", result.x
 
 
 # Main part begins
 
-agent_list = [Agent() for _ in range(N_AGENTS)]
 rsrc_object = Resource()
+agent_list = [Agent() for _ in range(N_AGENTS)]
+
+
+
 BOOT_RNDS = 3
-LEARN_RNDS = 101
+LEARN_RNDS = 151
 color_list = list()
 size_list = list()
 
@@ -149,7 +161,7 @@ for agent_index, agent in enumerate(agent_list):
 
 # Now start with actual learning
 for t in range(LEARN_RNDS):
-    if t % 5 == 0:
+    if t % 4 == 0:
         color_list.append('blue')
         size_list.append(40)
     else:
@@ -158,7 +170,7 @@ for t in range(LEARN_RNDS):
 
     for agent_index, agent in enumerate(agent_list):
         # exploration rounds
-        if t % 5 == 0:
+        if t % 4 == 0:
             agent_flow = agent.get_random_flow()
         # exploitation rounds
         else:
