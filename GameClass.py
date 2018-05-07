@@ -32,7 +32,7 @@ class Resource:
         for i in range(self.N_RES):
             #self.latency_func[i, :] = randNumGenerator.random_sample(2,)
             #self.latency_func[i, :] = np.array([(i+1)**2, (i+1)**2])
-            self.latency_func[i, :] = np.array([(i+1)**3, 0])
+            self.latency_func[i, :] = np.array([(i+1), 2])
 
         self.crnt_flow_matrix = np.zeros([self.N_AGENTS, self.N_RES])
         print "In Resource constructor:", self.latency_func[:, 1]
@@ -84,6 +84,7 @@ class Agent:
         self.rsrc_history = list([[] for i in range(self.N_RES)])
 
         # parameters
+        # SHOULDN'T THE STEP SIZE BE DECREASING?
         self.step_size = 10
         self.perturbation_width = 0.33
 
