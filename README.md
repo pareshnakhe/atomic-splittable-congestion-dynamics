@@ -9,14 +9,15 @@ In each round, each player computes the **optimal** flow based on the current pa
 The performance of this approach is compared with that of vanilla multiplicative weight update method.
 
 
-====================================================================================================
+=======================================================================================
 
 Conclusion:
 
 This approach is effective in bringing the system fairly fast to a state close to equilibrium. However, there are several parameters which have been set mostly based on trial-and-error method. For example, when updating the parameter estimates of the resources, what should be the step size? At what rate should the weighting of older data decrease? It is quite likely that the convergence of the system is not fast enough because of sub-optimal parameter setting.
 
 The multiplicative weight update on the other hand works extremely fast with step size $1/ \sqrt{t}$. I believe this is not surprising given provable theoretical guarantees.
-====================================================================================================
+
+==========================================================================================
 
 
 Lesson:
