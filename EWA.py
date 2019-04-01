@@ -3,6 +3,7 @@ import math
 from scipy import optimize
 from GameClass import Resource
 
+
 class Atomic_Splittable_Game_MW:
 
     def __init__(self, n_agents, n_res):
@@ -16,6 +17,7 @@ class Atomic_Splittable_Game_MW:
 
     def get_agent_list(self):
         return self.agent_list
+
 
 class Agent_MW:
     """

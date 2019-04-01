@@ -2,6 +2,7 @@ import numpy as np
 import math
 from scipy import optimize
 
+
 class Atomic_Splittable_Game:
 
     def __init__(self, n_agents, n_res):
@@ -70,7 +71,6 @@ class Agent:
         self.N_RES = N_RES
         self.rsrc_object = rsrc_object
 
-        #self.para_est_a = np.random.random_sample(N_RES,)
         if self.rsrc_object is None:
             print "Agent class has no resource object"
             exit(1)
@@ -79,12 +79,10 @@ class Agent:
         # this is a constant for each agent
         self.para_est_b = self.rsrc_object.latency_func[:, 1]
 
-        # this stores the flow sent and the resulting latency
-        # observed for each resource
-        self.rsrc_history = list([[] for i in range(self.N_RES)])
+        # flow sent and the resulting latency observed for each resource
+        self.rsrc_history = list([[] for _ in range(self.N_RES)])
 
         # parameters
-        # SHOULDN'T THE STEP SIZE BE DECREASING?
         self.step_size = 10
         self.perturbation_width = 0.33
 
@@ -104,8 +102,6 @@ class Agent:
         optimal flow with respect to these estimates
         :return: vector x of flows on each edge so that sum(x) = 1.
         """
-        # print "get_opt_flow:"
-        # print self.para_est_a, self.para_est_b
         x_init = np.array([1.0 / self.N_RES for _ in range(self.N_RES)])
         result = optimize.minimize(
             lambda x: np.dot(self.para_est_a, x ** 2) + np.dot(self.para_est_b, x),
@@ -139,7 +135,12 @@ class Agent:
             # \sum_t 1/\sqrt(t) (A*x_t + B - d_t)^2
             # The idea is to decrease the weight of older observations as 1/\sqrt(t).
             result = optimize.minimize(
-                    lambda x: (sum([math.sqrt(1.0/(index+1))*(x*data[0] + B - data[1])**2 for index, data in enumerate(crnt_rsrc_history)]) + self.step_size*((A_est - x)**2)),
+                    lambda x: (
+                            sum(
+                                [math.sqrt(1.0/(index+1))*(x*data[0] + B - data[1])**2
+                                for index, data in enumerate(crnt_rsrc_history)]
+                                )
+                            + self.step_size*((A_est - x)**2)),
                     np.array([0.1]),  # x_init
                     bounds=([(0, None)]),
                     method='SLSQP')
@@ -150,11 +151,14 @@ class Agent:
         # print "randomize_optimal_flow:"
         rand_flow = list()
         for flow in opt_flow:
-            # print flow
             mean = flow
             std = (flow / 3.0)
-            # 0.33 BELOW IS JUST A PARAMETER. NOT SURE WHAT IS THE RIGHT VALUE
-            rand_flow.append(np.random.normal(loc=mean, scale=std * math.pow(rnd + 1, -1 * self.perturbation_width)))
+            rand_flow.append(
+                np.random.normal(
+                    loc=mean,
+                    scale=std * math.pow(rnd + 1, -1 * self.perturbation_width)
+                )
+            )
 
         rand_flow = rand_flow + opt_flow
         return rand_flow / sum(rand_flow)

@@ -9,7 +9,6 @@ In each round, each player computes the **optimal** flow based on the current pa
 The performance of this approach is compared with that of vanilla multiplicative weight update method.
 
 
-=======================================================================================
 
 Conclusion:
 
@@ -17,9 +16,6 @@ This approach is effective in bringing the system fairly fast to a state close t
 
 The multiplicative weight update on the other hand works extremely fast with step size $1/ \sqrt{t}$. I believe this is not surprising given provable theoretical guarantees.
 
-==========================================================================================
+To sum up, estimate-then-optimize technique seems not work in multi-player settings. Especially, the older data that is used for estimation is usually outdated and hence leads to inaccurate predictions. Although, a more systematic theoretical study might help set the right parameters for better performance. In addition, the Hedge-style algorithms perform especially better given that the strategy set of the players, i.e. the flow vector belongs to the probability simplex; an ideal setting for Hedge algorithms. For pricing problems, it is unlikely that this approach would work.
 
 
-Lesson:
-
-estimate-then-optimize technique seems not work in multi-player settings. Especially, the older data that is used for estimation is usually outdated and hence leads to inaccurate predictions. Although, a more systematic theoretical study might help set the right parameters for better performance. In addition, the Hedge-style algorithms perform especially better given that the strategy set of the players, i.e. the flow vector belongs to the probability simplex; an ideal setting for Hedge algorithms. For pricing problems, it is unlikely that this approach would work.

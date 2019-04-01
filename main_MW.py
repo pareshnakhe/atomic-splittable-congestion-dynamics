@@ -10,16 +10,9 @@ agent_list = game.get_agent_list()
 
 BOOT_RNDS = 1
 LEARN_RNDS = 11
-# Helper data structures for plotting
-# total_latency = list()
-# color_list = list()
-# size_list = list()
-
 
 # Now start with actual learning
 for t in range(LEARN_RNDS):
-    # color_list.append('red')
-    # size_list.append(25)
 
     for agent_index, agent in enumerate(agent_list):
         agent_flow = agent.get_MW_flow()
